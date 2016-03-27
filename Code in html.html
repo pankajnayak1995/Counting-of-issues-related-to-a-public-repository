@@ -1,0 +1,78 @@
+<html>
+   <head>
+       <title>test</title>
+       <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+   </head>
+
+<body>
+   <input type="text" name='repo_link' placeholder="Enter your public GitHub repository link " size="30" id='link_name' required>
+	
+   <button onclick = 'check_and_execute()' value='submit'>Submit </button>
+	<table border="1">
+	<tr><td>Total number of open issues</td><td>Number of open issues that were opened in the last 24 hours</td><td>Number of open issues that were opened more than 24 hours ago but
+less than 7 days ago </td><td>Number of open issues that were opened more than 7 days ago</td></tr>
+	<tr id="tabledata"></tr></table>
+   <script>
+   function getLastWeek(){
+		var d = new Date();
+		var today = new Date( d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(), d.getUTCHours(), d.getUTCMinutes(), d.getUTCSeconds());
+		var lastWeek = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 7);
+		return lastWeek ;
+	}
+   function check_and_execute () {
+   jQuery('#tabledata').html('');
+   	var link = $('#link_name').val();
+   	link = link.replace('github.com', 'api.github.com/repos');
+	link=link+"/issues"
+   	console.log(link);
+   	jQuery.ajax({
+   	url:link,
+   	type:'GET',
+   	success: function(data){
+   	last_week_issues=0;
+   	var opne_issue = 0;
+	var today_issue=0;
+	var d = new Date();
+   	var datas =jQuery.parseJSON(JSON.stringify(data));
+   	//console.log(datas);
+	lastWeek=getLastWeek();
+	date_dict={}
+   	for(i = 0; i < datas.length; i++){
+   	console.log(datas['url']);
+	str_date=datas[i]['created_at'].split("T")[0];
+	year=str_date.split('-')[0];
+	month=parseInt(str_date.split('-')[1])-1;
+	day=str_date.split('-')[2];
+	var c_date=new Date(year,month,day);
+	
+   	if(datas[i]['state'] == 'open'){
+		var nothing=0;
+	}else{
+		continue;
+	}
+	if (c_date.getDate() == d.getUTCDate()){
+		console.log("today");
+		today_issue=today_issue+1;
+	} else if( c_date > lastWeek ){
+		last_week_issues=last_week_issues+1;
+	}else {
+		   	opne_issue++;
+	}
+	console.log(c_date);
+   	}
+	console.log("today=");
+	console.log(today_issue);
+	console.log("today and last week");
+	console.log(last_week_issues);
+	console.log("last week and month");
+   	console.log(opne_issue);
+	total_issues=today_issue+last_week_issues+opne_issue;
+	console.log("total");
+	console.log(today_issue+last_week_issues+opne_issue);
+	jQuery('#tabledata').append('<td>'+total_issues+'</td><td>'+today_issue+'</td><td>'+last_week_issues+'</td><td>'+opne_issue+'</td>');
+   	}
+   	});
+   }
+   </script>
+</body>
+</html>
